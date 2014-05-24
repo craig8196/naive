@@ -1,0 +1,4 @@
+naive
+=====
+
+Naive Bayes Lab
