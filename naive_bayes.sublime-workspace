@@ -232,10 +232,29 @@
 	"buffers":
 	[
 		{
+			"contents": "class ModelTrainer(object):\n\n	MULTIVARIATE = 1;\n	MULTINOMIAL = 2;\n	SMOOTHED = 3;\n\n	def __init__(self, type):\n		self.stop_words = self.fill_stop_list();\n\n		if type == ModelTrainer.MULTIVARIATE:\n			self.train_multivariate()\n		elif type == ModelTrainer.MULTINOMIAL:\n			self.train_multivariate()\n		elif type == ModelTrainer.SMOOTHED:\n			self.train_smoothed()\n\n	def fill_stop_list(self):\n		stop_list = []\n\n	def train_multivariate(self):\n		pass\n\n	def train_multinomial(self):\n		pass\n\n	def train_smoothed(self):\n		pass",
 			"file": "model_trainer.py",
+			"file_size": 443,
+			"file_write_time": 130454347080636405,
 			"settings":
 			{
-				"buffer_size": 422,
+				"buffer_size": 511,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "vocab_trie.py",
+			"settings":
+			{
+				"buffer_size": 1885,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "stoplist.txt",
+			"settings":
+			{
+				"buffer_size": 953,
 				"line_ending": "Windows"
 			}
 		}
@@ -345,7 +364,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -353,15 +372,15 @@
 					"file": "model_trainer.py",
 					"settings":
 					{
-						"buffer_size": 422,
+						"buffer_size": 511,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								247,
-								247
+								477,
+								477
 							]
 						],
 						"settings":
@@ -370,6 +389,58 @@
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "vocab_trie.py",
+					"settings":
+					{
+						"buffer_size": 1885,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1554,
+								1554
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 319.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "stoplist.txt",
+					"settings":
+					{
+						"buffer_size": 953,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								207,
+								207
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 1111.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
