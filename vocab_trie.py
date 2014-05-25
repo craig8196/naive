@@ -2,21 +2,23 @@
 
 class TrieNode(object):
 	
-	def __init__(self, character, parent, exists, index, current_group, group_map):
+	def __init__(self, character, exists, index, current_group, group_map):
 		self.character = character
 		self.children = {}
-		self.group_map = {}
+		self.group_map = group_map
+		self.exists = exists
 
-		if exists:
-			self.group_map = group_map
+		if self.exists:
 			self.group_map[current_group].numerator += 1
 			self.group_map[current_group].last_index = index 
 
 	def add_child(self, character, exists, index, current_group, group_map):
-		child = TrieNode(character, self, exists, index, current_group, group_map)
+		child = TrieNode(character, exists, index, current_group, group_map)
 		self.children[character] = child
 
 	def increment(self, index, current_group):
+		if not self.exists:
+			self.exists = True
 		if index != self.group_map[current_group].last_index:
 			self.group_map[current_group].numerator += 1 
 			self.group_map[current_group].last_index = index
@@ -25,12 +27,13 @@ class VocabTrie(object):
 
 	def __init__(self, group_map):
 		self.group_map = group_map
-		self.root_node = TrieNode('', None, False, 0, "", self.group_map)
+		self.root_node = TrieNode('', False, 0, "", self.group_map)
 
 	def add_word(self, word, doc_index, current_group):
 		current_node = self.root_node
 		for index, c in enumerate(word):
-			if current_node.children.keys.contains(c):
+			c = c.lower()
+			if c in current_node.children:
 				if index == len(word) - 1:
 					current_node.children[c].increment(doc_index, current_group)
 			else:
@@ -43,9 +46,10 @@ class VocabTrie(object):
 	def get_probability_word_given_group(self, word, group):
 		current_node = self.root_node
 		for index, c in enumerate(word):
-			if current_node.children.keys.contains(c):
-				if index == len(word) -1:
-					return current_node.children[c].group_map[group].numerator / current_node.children[c].group_map[group].denominator
+			c = c.lower()
+			if c in current_node.children:
+				if index == len(word) - 1 and current_node.children[c].exists:
+					return current_node.children[c].group_map[group].numerator , current_node.children[c].group_map[group].denominator
 			else:
 				#return -1 if the word does not exist in the vocabulary
 				return -1;
