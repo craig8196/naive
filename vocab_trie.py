@@ -2,58 +2,82 @@
 
 class TrieNode(object):
 	
-	def __init__(self, character, exists, index, current_group, group_map):
+	def __init__(self, character, exists, index):
 		self.character = character
 		self.children = {}
-		self.group_map = group_map
 		self.exists = exists
 
 		if self.exists:
-			self.group_map[current_group].numerator += 1
-			self.group_map[current_group].last_index = index 
+			self.occurrences = 1
+			self.last_index = index
+		else:
+			self.occurrences = 0
+			self.last_index = -1
 
-	def add_child(self, character, exists, index, current_group, group_map):
-		child = TrieNode(character, exists, index, current_group, group_map)
+	def add_child(self, character, exists, index):
+		child = TrieNode(character, exists, index)
 		self.children[character] = child
 
-	def increment(self, index, current_group):
+	def increment(self, index, model_type):
 		if not self.exists:
 			self.exists = True
-		if index != self.group_map[current_group].last_index:
-			self.group_map[current_group].numerator += 1 
-			self.group_map[current_group].last_index = index
+		if model_type == 1:
+			if index != self.last_index:
+				self.occurrences += 1 
+				self.last_index = index
+		else:
+			self.occurrences += 1
 
 class VocabTrie(object):
 
-	def __init__(self, group_map):
-		self.group_map = group_map
-		self.root_node = TrieNode('', False, 0, "", self.group_map)
+	def __init__(self, group, model_type):
+		self.root_node = TrieNode('', False, 0)
+		self.group = group
+		self.total = 0
+		self.model_type = model_type
 
-	def add_word(self, word, doc_index, current_group):
+	def add_word(self, word, doc_index):
 		current_node = self.root_node
 		for index, c in enumerate(word):
-			c = c.lower()
 			if c in current_node.children:
 				if index == len(word) - 1:
-					current_node.children[c].increment(doc_index, current_group)
+					current_node.children[c].increment(doc_index, self.model_type)
 			else:
 				if index == len(word) - 1:
-					current_node.add_child(c, True, doc_index, current_group, self.group_map)
+					current_node.add_child(c, True, doc_index)
 				else:
-					current_node.add_child(c, False, doc_index, current_group, self.group_map)
+					current_node.add_child(c, False, doc_index)
 			current_node = current_node.children[c]
 
-	def get_probability_word_given_group(self, word, group):
+	def get_probability_word_given_group(self, word):
+		retvalue = 1.0 / (self.total + 1)
 		current_node = self.root_node
 		for index, c in enumerate(word):
-			c = c.lower()
 			if c in current_node.children:
 				if index == len(word) - 1 and current_node.children[c].exists:
-					return current_node.children[c].group_map[group].numerator , current_node.children[c].group_map[group].denominator
+					retvalue = ((current_node.children[c].occurrences + 1) * 1.0) / (self.total + 1)
+					break
 			else:
 				#return -1 if the word does not exist in the vocabulary
-				return -1;
+				break
 			current_node = current_node.children[c]
+		if retvalue == 0:
+			print "not good"
+		return retvalue
+
+	def word_in_trie(self, word):
+		current_node = self.root_node
+		for index, c in enumerate(word):
+			if c in current_node.children:
+				if index == len(word) - 1 and current_node.children[c].exists:
+					return True
+			else:
+				#return -1 if the word does not exist in the vocabulary
+				return False
+			current_node = current_node.children[c]
+
+class Container(object):
+	pass
 
 
 

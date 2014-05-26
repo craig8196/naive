@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"group",
+				"group_map"
+			],
+			[
+				"chilr",
+				"children"
+			],
+			[
+				"stop",
+				"stop_list"
+			],
+			[
 				"Mu",
 				"MULTINOMIAL"
 			],
@@ -232,13 +244,10 @@
 	"buffers":
 	[
 		{
-			"contents": "class ModelTrainer(object):\n\n	MULTIVARIATE = 1;\n	MULTINOMIAL = 2;\n	SMOOTHED = 3;\n\n	def __init__(self, type):\n		self.stop_words = self.fill_stop_list();\n\n		if type == ModelTrainer.MULTIVARIATE:\n			self.train_multivariate()\n		elif type == ModelTrainer.MULTINOMIAL:\n			self.train_multivariate()\n		elif type == ModelTrainer.SMOOTHED:\n			self.train_smoothed()\n\n	def fill_stop_list(self):\n		stop_list = []\n\n	def train_multivariate(self):\n		pass\n\n	def train_multinomial(self):\n		pass\n\n	def train_smoothed(self):\n		pass",
 			"file": "model_trainer.py",
-			"file_size": 443,
-			"file_write_time": 130454347080636405,
 			"settings":
 			{
-				"buffer_size": 511,
+				"buffer_size": 1727,
 				"line_ending": "Windows"
 			}
 		},
@@ -246,7 +255,7 @@
 			"file": "vocab_trie.py",
 			"settings":
 			{
-				"buffer_size": 1885,
+				"buffer_size": 1961,
 				"line_ending": "Windows"
 			}
 		},
@@ -256,6 +265,14 @@
 			{
 				"buffer_size": 953,
 				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/NaiveBayes/20news-bydate-train/comp.graphics/37915",
+			"settings":
+			{
+				"buffer_size": 1145,
+				"line_ending": "Unix"
 			}
 		}
 	],
@@ -287,6 +304,8 @@
 	},
 	"file_history":
 	[
+		"/C/NaiveBayes/20news-bydate-train/comp.graphics/37929",
+		"/C/NaiveBayes/20news-bydate-train/comp.graphics/37913",
 		"/C/NaiveBayes/naive/model_trainer.py",
 		"/C/NaiveBayes/model_trainer.py",
 		"/C/NaiveBayes/20news-bydate-train/alt.atheism/49960",
@@ -372,23 +391,24 @@
 					"file": "model_trainer.py",
 					"settings":
 					{
-						"buffer_size": 511,
+						"buffer_size": 1727,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								477,
-								477
+								1545,
+								1545
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Python/Python.tmLanguage"
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 337.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -398,23 +418,24 @@
 					"file": "vocab_trie.py",
 					"settings":
 					{
-						"buffer_size": 1885,
+						"buffer_size": 1961,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1554,
-								1554
+								514,
+								514
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Python/Python.tmLanguage"
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 319.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -440,7 +461,33 @@
 							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 1111.0,
+						"translation.y": 299.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/C/NaiveBayes/20news-bydate-train/comp.graphics/37915",
+					"settings":
+					{
+						"buffer_size": 1145,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								481,
+								481
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
