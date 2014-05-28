@@ -100,15 +100,12 @@ class Classifier(object):
             self.log_p_c[cat] = math.log(cat_count) - math.log(self.total_docs)
         # Calc. log(P(F_i|C)) and log(1-P(F_i|C)), used with Multivariate Bernoulli where F is a feature (word type)
         self.log_f_given_c = {}
-        self.log_notf_given_c = {}
         # Calc. log(P(W_i|C)), used with Multinomial Model where W is a word token
         self.log_w_given_c = {}
         for cat, words in self.cat_word_count_doc_count.items():
             self.log_f_given_c[cat] = {}
-            self.log_notf_given_c[cat] = {}
             self.log_w_given_c[cat] = {}
             log_words = self.log_f_given_c[cat]
-            log_not_words = self.log_notf_given_c[cat]
             log_w_given_c = self.log_w_given_c[cat]
             doc_total = self.cat_total_doc_counts[cat]
             word_total = self.cat_total_word_counts[cat]
@@ -123,7 +120,6 @@ class Classifier(object):
                         count = 1
                         total += 1
                     log_words[word] = math.log(count) - math.log(total)
-                    log_not_words[word] = math.log(total - count) - math.log(total)
                 except Exception as e:
                     print e
                     print counts[1], doc_total
@@ -132,11 +128,35 @@ class Classifier(object):
             print "P(F|C)", self.log_f_given_c
             print "P(W|C)", self.log_w_given_c
     
+    def classify_baseline(self, words):
+        classification = ''
+        largest = -sys.float_info.max
+        for c in self.cat_total_doc_counts:
+            calc = self.calc_baseline(c, words)
+            if DEBUG:
+                print "Calc:", calc, "Class:", c
+            if calc > largest:
+                largest = calc
+                classification = c
+        return classification
+    
+    def calc_baseline(self, c, words):
+        result = 0
+        word_counts = self.cat_word_count_doc_count[c]
+        for w in words:
+            if w in word_counts:
+                result += word_counts[w][0]
+            else:
+                result += 1
+        return result
+    
     def classify_multivariate_bernoulli(self, words):
         classification = ''
         largest = -sys.float_info.max
         for c in self.cat_total_doc_counts:
             calc = self.calc_multivariate_bernoulli(c, words)
+            if DEBUG:
+                print "Calc:", calc, "Class:", c
             if calc > largest:
                 largest = calc
                 classification = c
@@ -146,43 +166,30 @@ class Classifier(object):
         result = self.log_p_c[c]
         word_set = set(words)
         log_f_given_c = self.log_f_given_c[c]
-        log_notf_given_c = self.log_notf_given_c[c]
-        for w, num in word_set.items():
-            if w in self.log_f_given_c:
-                result += num
+        for w in word_set:
+            if w in log_f_given_c:
+                result += log_f_given_c[w]
         return result
     
     def classify_multinomial(self, words):
         classification = ''
         largest = -sys.float_info.max
         for c in self.cat_total_doc_counts:
-            calc = self.calc_multinomial(c, words)
-            #~ print calc
+            calc = self.calc_multinomial2(c, words)
+            if DEBUG:
+                print "Calc:", calc, "Class:", c
             if calc > largest:
-                #~ print largest, classification
                 largest = calc
                 classification = c
         return classification
     
     def calc_multinomial(self, c, words):
         result = self.log_p_c[c]
+        log_w_given_c = self.log_w_given_c[c]
         for w in words:
-            if w in self.log_w_given_c:
-                result += self.log_w_given_c[w]
+            if w in log_w_given_c:
+                result += log_w_given_c[w]
         return result
-    
-    def classify_multinomial2(self, words):
-        print "Classifying:", words
-        classification = ''
-        largest = -sys.float_info.max
-        for c in self.cat_total_doc_counts:
-            calc = self.calc_multinomial2(c, words)
-            print "Calc:", calc
-            print "Class:", c
-            if calc > largest:
-                largest = calc
-                classification = c
-        return classification
     
     def calc_multinomial2(self, c, words):
         result = self.cat_total_doc_counts[c]
@@ -447,36 +454,85 @@ class ModelTester(object):
             return 0
 
 if __name__ == "__main__":
-    trainer = ModelTrainer("20news/train")
-    tester = ModelTester(2, trainer, "20news/test")
-    tester = ModelTester(1, trainer, "20news/test")
+    #~ trainer = ModelTrainer("20news/train")
+    #~ tester = ModelTester(2, trainer, "20news/test")
+    #~ tester = ModelTester(1, trainer, "20news/test")
     # print trainer.group_map["rec.sport.baseball"].get_probability_type_given_group("runs")
     
     
-    # print "Created classifier."
-    # c = Classifier()
-    # print "Adding stopwords."
-    #~ stopwords = generate_word_set_from_file('stopwords.txt')
-    #~ c.add_stopwords(stopwords)
-    # print "Training classifier."
-    # c.train_all_from_directory('simple/train')
-    # print "Initializing log space."
-    # c.initialize_log_space()
-    # print "Testing."
+    print "Created classifier."
+    c = Classifier()
+    print "Adding stopwords."
+    if DEBUG:
+        train_dir = 'simple/train'
+        test_dir = 'simple/test'
+    else:
+        train_dir = '20news/train'
+        test_dir = '20news/test'
+        stopwords = generate_word_set_from_file('stopwords.txt')
+        c.add_stopwords(stopwords)
+    print "Training classifier."
+    c.train_all_from_directory(train_dir)
+    print "Initializing log space."
+    c.initialize_log_space()
+    print "Testing."
     
-    # wins = 0
-    # losses = 0
-    # base_dir = 'simple/test'
-    # dirs = os.listdir(base_dir)
-    # print dirs
-    # for d in dirs:
-    #     files = os.listdir(base_dir + '/' + d)
-    #     for f in files:
-    #         #~ f = files[i]
-    #         with open(base_dir + '/' + d + '/' + f, 'r') as f2:
-    #             cat = c.classify_multinomial(generate_word_list_from_text(f2.read()))
-    #             if cat == d:
-    #                 wins += 1
-    #             else:
-    #                 losses += 1
-    # print wins, losses
+    confusion_matrix = {}
+    wins = 0
+    losses = 0
+    base_dir = test_dir
+    dirs = os.listdir(base_dir)
+    print dirs
+    for d in dirs:
+        files = os.listdir(base_dir + '/' + d)
+        for f in files:
+            with open(base_dir + '/' + d + '/' + f, 'r') as f2:
+                cat = c.classify_baseline(generate_word_list_from_text(f2.read()))
+                if cat == d:
+                    wins += 1
+                else:
+                    losses += 1
+                if (d, cat) not in confusion_matrix:
+                    confusion_matrix[(d, cat)] = 0
+                confusion_matrix[(d, cat)] += 1
+    print wins, losses, wins + losses
+    print confusion_matrix
+    
+    confusion_matrix = {}
+    wins = 0
+    losses = 0
+    base_dir = test_dir
+    dirs = os.listdir(base_dir)
+    print dirs
+    for d in dirs:
+        files = os.listdir(base_dir + '/' + d)
+        for f in files:
+            with open(base_dir + '/' + d + '/' + f, 'r') as f2:
+                cat = c.classify_multivariate_bernoulli(generate_word_list_from_text(f2.read()))
+                if cat == d:
+                    wins += 1
+                else:
+                    losses += 1
+                if (d, cat) not in confusion_matrix:
+                    confusion_matrix[(d, cat)] = 0
+                confusion_matrix[(d, cat)] += 1
+    print wins, losses, wins + losses
+    print confusion_matrix
+    
+    confusion_matrix = {}
+    wins = 0
+    losses = 0
+    for d in dirs:
+        files = os.listdir(base_dir + '/' + d)
+        for f in files:
+            with open(base_dir + '/' + d + '/' + f, 'r') as f2:
+                cat = c.classify_multinomial(generate_word_list_from_text(f2.read()))
+                if cat == d:
+                    wins += 1
+                else:
+                    losses += 1
+                if (d, cat) not in confusion_matrix:
+                    confusion_matrix[(d, cat)] = 0
+                confusion_matrix[(d, cat)] += 1
+    print wins, losses, wins + losses
+    print confusion_matrix
