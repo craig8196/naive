@@ -1,4 +1,5 @@
 from __future__ import division
+from decimal import Decimal
 
 import os
 import re
@@ -201,28 +202,31 @@ class ModelTrainer(object):
     MULTINOMIAL = 2;
     SMOOTHED = 3;
 
-    def __init__(self, type, dir):
+    def __init__(self, dir):
         self.stop_words = self.fill_stop_list();
         self.train_dir = dir
         self.dirs = [dir for dir in os.listdir(self.train_dir)]
         # self.group_map = self.init_group_map();
         self.group_map = {}
+        self.total_files = 0
+        self.train_models()
 
-        if type == ModelTrainer.MULTIVARIATE:
-            self.train_multivariate()
-        elif type == ModelTrainer.MULTINOMIAL:
-            self.train_multinomial()
-        elif type == ModelTrainer.SMOOTHED:
-            self.train_smoothed()
+        # if type == ModelTrainer.MULTIVARIATE:
+        #     self.train_multivariate()
+        # elif type == ModelTrainer.MULTINOMIAL:
+        #     self.train_multinomial()
+        # elif type == ModelTrainer.SMOOTHED:
+        #     self.train_smoothed()
 
     def fill_stop_list(self):
-        stop_trie = VocabTrie("", ModelTrainer.MULTIVARIATE)
+        stop_trie = VocabTrie("")
         f = open('stoplist.txt', 'r')
         for line in f:
             stop_trie.add_word(line.rstrip().lower(), 0)
         return stop_trie
 
     def init_group_map(self):
+    	pass
         # group_map = {}
         # for my_dir in self.dirs:
         #   total = len([n for n in os.listdir(self.train_dir + "/" + my_dir)])
@@ -233,63 +237,79 @@ class ModelTrainer(object):
         #   group_map[my_dir] = fraction
         # return group_map
 
-        group_map = []
-        for my_dir in self.dirs:
-            total = len([n for n in os.listdir(self.train_dir + "/" + my_dir)])
-            fraction = Container()
-            fraction.numerator = 1
-            fraction.denominator = total
+        # group_map = []
+        # for my_dir in self.dirs:
+        #     total = len([n for n in os.listdir(self.train_dir + "/" + my_dir)])
+        #     fraction = Container()
+        #     fraction.numerator = 1
+        #     fraction.denominator = total
 
-            fraction.name = my_dir
-            group_map.append(fraction)
-        return group_map
+        #     fraction.name = my_dir
+        #     group_map.append(fraction)
+        # return group_map
 
-    def train_multivariate(self):
-        print "\nBegin Multivariate Training"
-        self.vocabulary = []
-        total_words = 0
-        self.total_files = 0
+    # def train_multivariate(self):
+    # 	print "\nBegin Training"
+    # 	self.total_files = 0
+    #     for my_dir in self.dirs:
+    #         print my_dir
+    #         mytrie = VocabTrie(my_dir, ModelTrainer.MULTIVARIATE)
+    #         for index, f in enumerate(os.listdir(self.train_dir + "/" + my_dir)):
+    #             data_file = open(self.train_dir + "/" + my_dir + "/" + f, 'r')
+    #             for line in data_file:
+    #                 for word in line.split():
+    #                     total_words += 1
+    #                     tempword = ''.join(c for c in word if c.isalpha())
+    #                     tempword = tempword.lower()
+    #                     if len(tempword) > 0 and not self.stop_words.word_in_trie(tempword):
+    #                         word_stored = mytrie.word_in_trie(tempword)
+    #                         if not word_stored:
+    #                             for k, v in self.group_map.iteritems():
+    #                                 word_stored = v.word_in_trie(tempword)
+    #                                 if word_stored:
+    #                                     break
+    #                         if not word_stored:
+    #                             self.vocabulary.append(tempword)
+    #                         mytrie.add_word(tempword.lower(), index)
+    #             mytrie.total = index + 1
+    #             self.total_files += 1
+    #         self.group_map[mytrie.group] = mytrie
+
+    def train_models(self):
+        print "\nBegin Training"
         for my_dir in self.dirs:
             print my_dir
-            mytrie = VocabTrie(my_dir, ModelTrainer.MULTIVARIATE)
+            mytrie = VocabTrie(my_dir)
             for index, f in enumerate(os.listdir(self.train_dir + "/" + my_dir)):
+            	self.total_files += 1
+            	mytrie.doc_total += 1
                 data_file = open(self.train_dir + "/" + my_dir + "/" + f, 'r')
                 for line in data_file:
                     for word in line.split():
-                        total_words += 1
                         tempword = ''.join(c for c in word if c.isalpha())
                         tempword = tempword.lower()
                         if len(tempword) > 0 and not self.stop_words.word_in_trie(tempword):
-                            word_stored = mytrie.word_in_trie(tempword)
-                            if not word_stored:
-                                for k, v in self.group_map.iteritems():
-                                    word_stored = v.word_in_trie(tempword)
-                                    if word_stored:
-                                        break
-                            if not word_stored:
-                                self.vocabulary.append(tempword)
-                            mytrie.add_word(tempword.lower(), index)
-                mytrie.total = index + 1
-                self.total_files += 1
+                        	mytrie.word_total += 1
+                        	mytrie.add_word(tempword.lower(), index)
             self.group_map[mytrie.group] = mytrie
 
-    def train_multinomial(self):
-        print "\nBegin Multinomial Training"
-        self.total_files = 0
-        for my_dir in self.dirs:
-            print my_dir
-            mytrie = VocabTrie(my_dir, ModelTrainer.MULTINOMIAL)
-            for index, f in enumerate(os.listdir(self.train_dir + "/" + my_dir)):
-                self.total_files += 1
-                data_file = open(self.train_dir + "/" + my_dir + "/" + f, 'r')
-                for line in data_file:
-                    for word in line.split():
-                        tempword = ''.join(c for c in word if c.isalpha())
-                        tempword = tempword.lower()
-                        if len(tempword) > 0 and not self.stop_words.word_in_trie(tempword):
-                            mytrie.add_word(tempword, index)
-                        mytrie.total += 1
-            self.group_map[mytrie.group] = mytrie
+    # def train_multinomial(self):
+    #     print "\nBegin Multinomial Training"
+    #     self.total_files = 0
+    #     for my_dir in self.dirs:
+    #         print my_dir
+    #         mytrie = VocabTrie(my_dir, ModelTrainer.MULTINOMIAL)
+    #         for index, f in enumerate(os.listdir(self.train_dir + "/" + my_dir)):
+    #             self.total_files += 1
+    #             data_file = open(self.train_dir + "/" + my_dir + "/" + f, 'r')
+    #             for line in data_file:
+    #                 for word in line.split():
+    #                     tempword = ''.join(c for c in word if c.isalpha())
+    #                     tempword = tempword.lower()
+    #                     if len(tempword) > 0 and not self.stop_words.word_in_trie(tempword):
+    #                         mytrie.add_word(tempword, index)
+    #                     mytrie.total += 1
+    #         self.group_map[mytrie.group] = mytrie
 
     def train_smoothed(self):
         pass
@@ -300,10 +320,10 @@ class ModelTester(object):
         self.dirs = [dir for dir in os.listdir(self.test_dir)]
         self.group_map = trainer.group_map
         self.total_files = trainer.total_files
+        self.stop_words = trainer.stop_words
         self.correct_map = {}
 
         if type == ModelTrainer.MULTIVARIATE:
-            self.vocabulary = trainer.vocabulary
             self.test_multivariate()
         elif type == ModelTrainer.MULTINOMIAL:
             self.test_multinomial()
@@ -319,21 +339,24 @@ class ModelTester(object):
             for index, f in enumerate(os.listdir(self.test_dir + "/" + my_dir)):
                 words_in_doc = []
                 data_file = open(self.test_dir + "/" + my_dir + "/" + f, 'r')
-                temp_trie = VocabTrie(my_dir, ModelTrainer.MULTIVARIATE)
+                temp_trie = VocabTrie(my_dir)
                 for line in data_file:
                     for word in line.split():
                         tempword = ''.join(c for c in word if c.isalpha())
                         tempword = tempword.lower()
-                        if len(tempword) > 0:
+                        if len(tempword) > 0 and not self.stop_words.word_in_trie(tempword):
                             temp_trie.add_word(tempword, index)
                             words_in_doc.append(tempword)
                 total_correct += self.is_max_correct(my_dir, temp_trie, words_in_doc)
                 total += 1
             self.correct_map[my_dir] = [total_correct, total]
         print "\nMultivariate Results [correct, total]"
+        total = 0
         for k, v in self.correct_map.iteritems():
             print k
             print v
+            total += (1.0 * v[0]) / v[1]
+        print (total * 1.0) / 20.0 
 
     def test_multinomial(self):
         print "\nBegin Multinomial Testing"
@@ -348,21 +371,24 @@ class ModelTester(object):
                     for word in line.split():
                         tempword = ''.join(c for c in word if c.isalpha())
                         tempword = tempword.lower()
-                        if len(tempword) > 0:
+                        if len(tempword) > 0 and not self.stop_words.word_in_trie(tempword):
                             words_in_doc.append(tempword)
                 total_correct += self.is_max_correct_multinomial(my_dir, words_in_doc)
                 total += 1
             self.correct_map[my_dir] = [total_correct, total]
         print "\nMultinomial Results [correct, total]"
+        total = 0
         for k, v in self.correct_map.iteritems():
             print k
             print v
+            total += (1.0 * v[0]) / v[1]
+        print (total * 1.0) / 20.0
 
     def test_smoothed():
         pass
 
     def is_max_correct(self, group, temp_trie, words_in_doc):
-        highest = 0
+        highest = -sys.maxint
         max_group = ""
         # in_doc = []
         # not_in_doc = []
@@ -372,32 +398,44 @@ class ModelTester(object):
         #   else:
         #       not_in_doc.append(word)
         for k, v in self.group_map.iteritems():
-            probability = 1.0
-            for word in words_in_doc:
-                probability *= (1 + v.get_probability_word_given_group(word))
+			num = 0
+			denom = 0
+			for word in words_in_doc:  
+				probability = (v.get_probability_type_given_group(word))
+				num += math.log(probability[0], 2)
+				denom += math.log(probability[1], 2)
             # for word in in_doc:
             #   probability *= v.get_probability_word_given_group(word)
             # for word in not_in_doc:
             #   probability *= (1 - v.get_probability_word_given_group(word))
-            probability *= (1.0 * v.total) / self.total_files
-            if probability == 0:
-                print "probability 0?"
-            if probability > highest:
-                highest = probability
-                max_group = k
+			num += math.log(v.doc_total, 2)
+			denom += math.log(self.total_files, 2)
+			probability = num - denom
+
+			if probability == 0:
+			    print "probability 0?"
+			if probability > highest:
+			    highest = probability
+			    max_group = k
         if max_group == group:
             return 1
         else:
             return 0
 
     def is_max_correct_multinomial(self, group, words_in_doc):
-        highest = 0
+        highest = -sys.maxint
         max_group = ""
         for k, v in self.group_map.iteritems():
-            probability = 1.0
+            num = 0
+            denom = 0
             for word in words_in_doc:
-                probability *= (1 + v.get_probability_word_given_group(word))
-            probability *= (1.0 * v.total) / self.total_files
+                probability = (v.get_probability_token_given_group(word))
+                num += math.log(probability[0], 2)
+                denom += math.log(probability[1], 2)
+        	# probability *= (1 + ((1.0 * v.doc_total) / self.total_files))
+        	num += math.log(v.doc_total, 2)
+            denom += math.log(self.total_files, 2)
+            probability = num - denom
             if probability == 0:
                 print "probability 0?"
             if probability > highest:
@@ -409,37 +447,36 @@ class ModelTester(object):
             return 0
 
 if __name__ == "__main__":
-    #~ trainer = ModelTrainer(2, "20news/train")
-    #~ tester = ModelTester(2, trainer, "20news/test")
-    #~ trainer = ModelTrainer(1, "20news/train")
-    #~ tester = ModelTester(1, trainer, "20news/test")
-    # print trainer.group_map["rec.sport.baseball"].get_probability_word_given_group("the")
+    trainer = ModelTrainer("20news/train")
+    tester = ModelTester(2, trainer, "20news/test")
+    tester = ModelTester(1, trainer, "20news/test")
+    # print trainer.group_map["rec.sport.baseball"].get_probability_type_given_group("runs")
     
     
-    print "Created classifier."
-    c = Classifier()
-    print "Adding stopwords."
+    # print "Created classifier."
+    # c = Classifier()
+    # print "Adding stopwords."
     #~ stopwords = generate_word_set_from_file('stopwords.txt')
     #~ c.add_stopwords(stopwords)
-    print "Training classifier."
-    c.train_all_from_directory('simple/train')
-    print "Initializing log space."
-    c.initialize_log_space()
-    print "Testing."
+    # print "Training classifier."
+    # c.train_all_from_directory('simple/train')
+    # print "Initializing log space."
+    # c.initialize_log_space()
+    # print "Testing."
     
-    wins = 0
-    losses = 0
-    base_dir = 'simple/test'
-    dirs = os.listdir(base_dir)
-    print dirs
-    for d in dirs:
-        files = os.listdir(base_dir + '/' + d)
-        for f in files:
-            #~ f = files[i]
-            with open(base_dir + '/' + d + '/' + f, 'r') as f2:
-                cat = c.classify_multinomial(generate_word_list_from_text(f2.read()))
-                if cat == d:
-                    wins += 1
-                else:
-                    losses += 1
-    print wins, losses
+    # wins = 0
+    # losses = 0
+    # base_dir = 'simple/test'
+    # dirs = os.listdir(base_dir)
+    # print dirs
+    # for d in dirs:
+    #     files = os.listdir(base_dir + '/' + d)
+    #     for f in files:
+    #         #~ f = files[i]
+    #         with open(base_dir + '/' + d + '/' + f, 'r') as f2:
+    #             cat = c.classify_multinomial(generate_word_list_from_text(f2.read()))
+    #             if cat == d:
+    #                 wins += 1
+    #             else:
+    #                 losses += 1
+    # print wins, losses

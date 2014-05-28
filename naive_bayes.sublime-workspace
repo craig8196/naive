@@ -4,20 +4,40 @@
 		"selected_items":
 		[
 			[
+				"total",
+				"total_files"
+			],
+			[
+				"word",
+				"words_in_doc"
+			],
+			[
+				"not",
+				"not_in_doc"
+			],
+			[
+				"stop",
+				"stop_words"
+			],
+			[
+				"Mu",
+				"MULTIVARIATE"
+			],
+			[
+				"words",
+				"words_not_in_document"
+			],
+			[
+				"MU",
+				"MULTIVARIATE"
+			],
+			[
 				"group",
 				"group_map"
 			],
 			[
 				"chilr",
 				"children"
-			],
-			[
-				"stop",
-				"stop_list"
-			],
-			[
-				"Mu",
-				"MULTINOMIAL"
 			],
 			[
 				"M",
@@ -247,7 +267,7 @@
 			"file": "model_trainer.py",
 			"settings":
 			{
-				"buffer_size": 1727,
+				"buffer_size": 7057,
 				"line_ending": "Windows"
 			}
 		},
@@ -255,7 +275,7 @@
 			"file": "vocab_trie.py",
 			"settings":
 			{
-				"buffer_size": 1961,
+				"buffer_size": 2198,
 				"line_ending": "Windows"
 			}
 		},
@@ -304,6 +324,8 @@
 	},
 	"file_history":
 	[
+		"/C/NaiveBayes/20news-bydate-train/rec.sport.baseball/102634",
+		"/C/NaiveBayes/20news-bydate-train/rec.sport.baseball/102586",
 		"/C/NaiveBayes/20news-bydate-train/comp.graphics/37929",
 		"/C/NaiveBayes/20news-bydate-train/comp.graphics/37913",
 		"/C/NaiveBayes/naive/model_trainer.py",
@@ -335,6 +357,9 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"Training",
+			"iteritems",
+			"iter_items",
 			"cond_prob_obstacle_not_obstacle",
 			"cond_prob_obstacle_obstacle",
 			"set_true_positive",
@@ -383,7 +408,7 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 0,
 			"sheets":
 			[
 				{
@@ -391,15 +416,15 @@
 					"file": "model_trainer.py",
 					"settings":
 					{
-						"buffer_size": 1727,
+						"buffer_size": 7057,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1545,
-								1545
+								3027,
+								3027
 							]
 						],
 						"settings":
@@ -408,7 +433,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 337.0,
+						"translation.y": 907.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -418,15 +443,15 @@
 					"file": "vocab_trie.py",
 					"settings":
 					{
-						"buffer_size": 1961,
+						"buffer_size": 2198,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								514,
-								514
+								449,
+								449
 							]
 						],
 						"settings":
@@ -461,7 +486,7 @@
 							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 299.0,
+						"translation.y": 80.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
