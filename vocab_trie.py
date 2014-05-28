@@ -105,6 +105,22 @@ class VocabTrie(object):
 		# 	print "not good"
 		return retvalue
 
+	def get_probability_smoothed(self, word):
+		retvalue = [0, self.word_total]
+		current_node = self.root_node
+		for index, c in enumerate(word):
+			if c in current_node.children:
+				if index == len(word) - 1 and current_node.children[c].exists:
+					retvalue = [current_node.children[c].total_occurrences * 1.0 , self.word_total]
+					break
+			else:
+				#return -1 if the word does not exist in the vocabulary
+				break
+			current_node = current_node.children[c]
+		# if retvalue == 0:
+		# 	print "not good"
+		return retvalue
+
 	def word_in_trie(self, word):
 		current_node = self.root_node
 		for index, c in enumerate(word):

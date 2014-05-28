@@ -324,11 +324,43 @@ class ModelTester(object):
         self.correct_map = {}
 
         if type == ModelTrainer.MULTIVARIATE:
-            self.test_multivariate()
+            self.test("Multivariate")
         elif type == ModelTrainer.MULTINOMIAL:
-            self.test_multinomial()
+            self.test("Multinomial")
         elif type == ModelTrainer.SMOOTHED:
-            self.test_smoothed()
+            self.test("Smoothed")
+
+    def test(self, model):
+        print ("\nBegin " + str(model) + " Testing")
+        for my_dir in self.dirs:
+            print my_dir
+            total_correct = 0
+            total = 0
+            for index, f in enumerate(os.listdir(self.test_dir + "/" + my_dir)):
+                words_in_doc = []
+                data_file = open(self.test_dir + "/" + my_dir + "/" + f, 'r')
+                for line in data_file:
+                    for word in line.split():
+                        tempword = ''.join(c for c in word if c.isalpha())
+                        tempword = tempword.lower()
+                        if len(tempword) > 0 and not self.stop_words.word_in_trie(tempword):
+                            words_in_doc.append(tempword)
+                if model == "Multivariate":
+                	total_correct += self.is_max_correct(my_dir, words_in_doc)
+                elif model == "Multinomial":	
+                	total_correct += self.is_max_correct_multinomial(my_dir, words_in_doc)
+                else:
+                	total_correct += self.is_max_correct_smoothed(my_dir, words_in_doc)
+                total += 1
+            self.correct_map[my_dir] = [total_correct, total]
+        print ("\n" + str(model) + " Results [correct, total]")
+        total = 0
+        for k, v in self.correct_map.iteritems():
+            print k
+            print v
+            total += (1.0 * v[0]) / v[1]
+        print (total * 1.0) / 20.0 
+
 
     def test_multivariate(self):
         print "\nBegin Multivariate Testing"
@@ -385,9 +417,32 @@ class ModelTester(object):
         print (total * 1.0) / 20.0
 
     def test_smoothed():
-        pass
+        print "\nBegin Multinomial Testing"
+        for my_dir in self.dirs:
+            print my_dir
+            total_correct = 0
+            total = 0
+            for index, f in enumerate(os.listdir(self.test_dir + "/" + my_dir)):
+                words_in_doc = []
+                data_file = open(self.test_dir + "/" + my_dir + "/" + f, 'r')
+                for line in data_file:
+                    for word in line.split():
+                        tempword = ''.join(c for c in word if c.isalpha())
+                        tempword = tempword.lower()
+                        if len(tempword) > 0 and not self.stop_words.word_in_trie(tempword):
+                            words_in_doc.append(tempword)
+                total_correct += self.is_max_correct_smoothed(my_dir, words_in_doc)
+                total += 1
+            self.correct_map[my_dir] = [total_correct, total]
+        print "\nMultinomial Results [correct, total]"
+        total = 0
+        for k, v in self.correct_map.iteritems():
+            print k
+            print v
+            total += (1.0 * v[0]) / v[1]
+        print (total * 1.0) / 20.0
 
-    def is_max_correct(self, group, temp_trie, words_in_doc):
+    def is_max_correct(self, group, words_in_doc):
         highest = -sys.maxint
         max_group = ""
         # in_doc = []
@@ -446,8 +501,34 @@ class ModelTester(object):
         else:
             return 0
 
+    def is_max_correct_smoothed(self, group, words_in_doc):
+        highest = -sys.maxint
+        max_group = ""
+        for k, v in self.group_map.iteritems():
+            num = 0
+            denom = 0
+            for word in words_in_doc:
+                probability = (v.get_probability_token_given_group(word))
+                if probability[0] != 0:
+                	num += math.log(probability[0], 2)
+                	denom += math.log(probability[1], 2)
+        	# probability *= (1 + ((1.0 * v.doc_total) / self.total_files))
+        	num += math.log(v.doc_total, 2)
+            denom += math.log(self.total_files, 2)
+            probability = num - denom
+            if probability == 0:
+                print "probability 0?"
+            if probability > highest:
+                highest = probability
+                max_group = k
+        if max_group == group:
+            return 1
+        else:
+            return 0
+
 if __name__ == "__main__":
     trainer = ModelTrainer("20news/train")
+    tester = ModelTester(3, trainer, "20news/test")
     tester = ModelTester(2, trainer, "20news/test")
     tester = ModelTester(1, trainer, "20news/test")
     # print trainer.group_map["rec.sport.baseball"].get_probability_type_given_group("runs")
