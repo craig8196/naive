@@ -322,18 +322,43 @@ class ModelTester(object):
         self.total_files = trainer.total_files
         self.stop_words = trainer.stop_words
         self.correct_map = {}
+        self.confusion_matrix_row = {}
+
+        self.initialize_confusion_matrix()
 
         if type == ModelTrainer.MULTIVARIATE:
             self.test("Multivariate")
+            f = open('Multivariate.csv', 'w')
+            f.write(self.filestr)
         elif type == ModelTrainer.MULTINOMIAL:
             self.test("Multinomial")
+            f = open('Multinomial.csv', 'w')
+            f.write(self.filestr)
         elif type == ModelTrainer.SMOOTHED:
             self.test("Smoothed")
+            f = open('Smoothed.csv', 'w')
+            f.write(self.filestr)
+
+    def initialize_confusion_matrix(self):
+    	self.filestr = ""
+    	for group in sorted(self.group_map.keys()):
+    		self.filestr += ","
+    		self.filestr += group
+    	self.filestr += "\n"
+
+    def add_row_to_matrix(self, row, group):
+    	self.filestr += group
+    	for gp in sorted(self.group_map.keys()):
+    		self.filestr += ","
+    		self.filestr += str(row[gp])
+    	self.filestr += "\n"
 
     def test(self, model):
         print ("\nBegin " + str(model) + " Testing")
         for my_dir in self.dirs:
             print my_dir
+            for k in self.group_map.keys():
+        		self.confusion_matrix_row[k] = 0
             total_correct = 0
             total = 0
             for index, f in enumerate(os.listdir(self.test_dir + "/" + my_dir)):
@@ -346,12 +371,15 @@ class ModelTester(object):
                         if len(tempword) > 0 and not self.stop_words.word_in_trie(tempword):
                             words_in_doc.append(tempword)
                 if model == "Multivariate":
-                	total_correct += self.is_max_correct(my_dir, words_in_doc)
+                	value = self.is_max_correct(my_dir, words_in_doc)
                 elif model == "Multinomial":	
-                	total_correct += self.is_max_correct_multinomial(my_dir, words_in_doc)
+                	value = self.is_max_correct_multinomial(my_dir, words_in_doc)
                 else:
-                	total_correct += self.is_max_correct_smoothed(my_dir, words_in_doc)
+                	value = self.is_max_correct_smoothed(my_dir, words_in_doc)
+                total_correct += value[0]
+                self.confusion_matrix_row[value[1]] += 1
                 total += 1
+            self.add_row_to_matrix(self.confusion_matrix_row, my_dir)
             self.correct_map[my_dir] = [total_correct, total]
         print ("\n" + str(model) + " Results [correct, total]")
         total = 0
@@ -473,9 +501,9 @@ class ModelTester(object):
 			    highest = probability
 			    max_group = k
         if max_group == group:
-            return 1
+            return 1, max_group
         else:
-            return 0
+            return 0, max_group
 
     def is_max_correct_multinomial(self, group, words_in_doc):
         highest = -sys.maxint
@@ -497,9 +525,9 @@ class ModelTester(object):
                 highest = probability
                 max_group = k
         if max_group == group:
-            return 1
+            return 1, max_group
         else:
-            return 0
+            return 0, max_group
 
     def is_max_correct_smoothed(self, group, words_in_doc):
         highest = -sys.maxint
@@ -522,9 +550,9 @@ class ModelTester(object):
                 highest = probability
                 max_group = k
         if max_group == group:
-            return 1
+            return 1, max_group
         else:
-            return 0
+            return 0, max_group
 
 if __name__ == "__main__":
     trainer = ModelTrainer("20news/train")
