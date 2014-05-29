@@ -276,7 +276,7 @@ class ModelTrainer(object):
 
     def fill_stop_list(self):
         stop_trie = VocabTrie("")
-        f = open('stoplist.txt', 'r')
+        f = open('stopwords.txt', 'r')
         for line in f:
             stop_trie.add_word(line.rstrip().lower(), 0)
         return stop_trie
