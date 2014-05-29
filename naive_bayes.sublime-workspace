@@ -4,6 +4,30 @@
 		"selected_items":
 		[
 			[
+				"con",
+				"confusion_matrix_row"
+			],
+			[
+				"add",
+				"add_row_to_matrix"
+			],
+			[
+				"inite",
+				"initialize_confusion_matrix"
+			],
+			[
+				"words",
+				"words_in_doc"
+			],
+			[
+				"is_max_corre",
+				"is_max_correct_smoothed"
+			],
+			[
+				"train",
+				"train_models"
+			],
+			[
 				"total",
 				"total_files"
 			],
@@ -22,10 +46,6 @@
 			[
 				"Mu",
 				"MULTIVARIATE"
-			],
-			[
-				"words",
-				"words_not_in_document"
 			],
 			[
 				"MU",
@@ -180,10 +200,6 @@
 				"total_hits"
 			],
 			[
-				"con",
-				"conditional_probability"
-			],
-			[
 				"dist_",
 				"dist_goal2"
 			],
@@ -267,7 +283,32 @@
 			"file": "model_trainer.py",
 			"settings":
 			{
-				"buffer_size": 7057,
+				"buffer_size": 23317,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/William/AppData/Roaming/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+			"settings":
+			{
+				"buffer_size": 88,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "multinomial 0.516310173005\nmultivariate 0.504600391256\n\n0.769386445366",
+			"settings":
+			{
+				"buffer_size": 70,
+				"line_ending": "Windows",
+				"name": "multinomial 0.516310173005"
+			}
+		},
+		{
+			"file": ".gitignore",
+			"settings":
+			{
+				"buffer_size": 551,
 				"line_ending": "Windows"
 			}
 		},
@@ -275,7 +316,7 @@
 			"file": "vocab_trie.py",
 			"settings":
 			{
-				"buffer_size": 2198,
+				"buffer_size": 4223,
 				"line_ending": "Windows"
 			}
 		},
@@ -324,6 +365,7 @@
 	},
 	"file_history":
 	[
+		"/C/NaiveBayes/naive/Smoothed.csv",
 		"/C/NaiveBayes/20news-bydate-train/rec.sport.baseball/102634",
 		"/C/NaiveBayes/20news-bydate-train/rec.sport.baseball/102586",
 		"/C/NaiveBayes/20news-bydate-train/comp.graphics/37929",
@@ -357,6 +399,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"VocabTrie",
 			"Training",
 			"iteritems",
 			"iter_items",
@@ -416,15 +459,15 @@
 					"file": "model_trainer.py",
 					"settings":
 					{
-						"buffer_size": 7057,
+						"buffer_size": 23317,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3027,
-								3027
+								13815,
+								13815
 							]
 						],
 						"settings":
@@ -433,31 +476,30 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 907.0,
+						"translation.y": 4847.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "vocab_trie.py",
+					"file": "/C/Users/William/AppData/Roaming/Sublime Text 2/Packages/User/Preferences.sublime-settings",
 					"settings":
 					{
-						"buffer_size": 2198,
+						"buffer_size": 88,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								449,
-								449
+								88,
+								88
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Python/Python.tmLanguage",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/JavaScript/JSON.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -467,6 +509,85 @@
 				},
 				{
 					"buffer": 2,
+					"settings":
+					{
+						"buffer_size": 70,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								70,
+								70
+							]
+						],
+						"settings":
+						{
+							"auto_name": "multinomial 0.516310173005",
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": ".gitignore",
+					"settings":
+					{
+						"buffer_size": 551,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								551,
+								551
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 589.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "vocab_trie.py",
+					"settings":
+					{
+						"buffer_size": 4223,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3554,
+								3554
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1492.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
 					"file": "stoplist.txt",
 					"settings":
 					{
@@ -492,7 +613,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 6,
 					"file": "/C/NaiveBayes/20news-bydate-train/comp.graphics/37915",
 					"settings":
 					{

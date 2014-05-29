@@ -60,7 +60,6 @@ class VocabTrie(object):
 					retvalue = ((current_node.children[c].occurrences + 1) * 1.0) / (self.total + 1)
 					break
 			else:
-				#return -1 if the word does not exist in the vocabulary
 				break
 			current_node = current_node.children[c]
 		if retvalue == 0:
@@ -69,7 +68,6 @@ class VocabTrie(object):
 
 	def get_probability_type_given_group(self, word):
 		retvalue = [1.0 , (self.doc_total + 1)]
-		# retvalue = 0
 		current_node = self.root_node
 		for index, c in enumerate(word):
 			if c in current_node.children:
@@ -79,16 +77,12 @@ class VocabTrie(object):
 					retvalue = current_node.children[c].type_probability
 					break
 			else:
-				#return -1 if the word does not exist in the vocabulary
 				break
 			current_node = current_node.children[c]
-		# if retvalue == 0:
-		# 	print "not good"
 		return retvalue
 
 	def get_probability_token_given_group(self, word):
 		retvalue = [1.0 , (self.word_total + 1)]
-		# retvalue = 0
 		current_node = self.root_node
 		for index, c in enumerate(word):
 			if c in current_node.children:
@@ -98,11 +92,8 @@ class VocabTrie(object):
 					retvalue = current_node.children[c].token_probability
 					break
 			else:
-				#return -1 if the word does not exist in the vocabulary
 				break
 			current_node = current_node.children[c]
-		# if retvalue == 0:
-		# 	print "not good"
 		return retvalue
 
 	def get_probability_smoothed(self, word):
@@ -114,11 +105,8 @@ class VocabTrie(object):
 					retvalue = [current_node.children[c].total_occurrences * 1.0 , self.word_total]
 					break
 			else:
-				#return -1 if the word does not exist in the vocabulary
 				break
 			current_node = current_node.children[c]
-		# if retvalue == 0:
-		# 	print "not good"
 		return retvalue
 
 	def word_in_trie(self, word):
@@ -128,7 +116,6 @@ class VocabTrie(object):
 				if index == len(word) - 1 and current_node.children[c].exists:
 					return True
 			else:
-				#return -1 if the word does not exist in the vocabulary
 				return False
 			current_node = current_node.children[c]
 
