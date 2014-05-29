@@ -169,6 +169,8 @@ class Classifier(object):
             if calc > largest:
                 largest = calc
                 classification = c
+        if classification == '':
+            print "ERROR: Classification is empty.", "Calc:", calc, "Words:", words
         return classification
     
     def classify_baseline(self, words):
@@ -661,7 +663,7 @@ if __name__ == "__main__":
         #~ train_dir = 'simple/train'
     #~ else:
         #~ train_dir = '20news/train'
-        #~ stopwords = generate_word_set_from_file('stoplist.txt')
+        #~ stopwords = generate_word_set_from_file('stopwords.txt')
         #~ c.add_stopwords(stopwords)
     #~ print "Training classifier."
     #~ c.train_all_from_directory(train_dir)
