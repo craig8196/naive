@@ -651,34 +651,34 @@ def run_classifier_test(name, classifier_function):
         print confusion_matrix
 
 if __name__ == "__main__":
-    #~ trainer = ModelTrainer("20news/train")
-    #~ tester = ModelTester(3, trainer, "20news/test")
-    #~ tester = ModelTester(2, trainer, "20news/test")
-    #~ tester = ModelTester(1, trainer, "20news/test")
+    trainer = ModelTrainer("20news/train")
+    tester = ModelTester(3, trainer, "20news/test")
+    tester = ModelTester(2, trainer, "20news/test")
+    tester = ModelTester(1, trainer, "20news/test")
     # print trainer.group_map["rec.sport.baseball"].get_probability_type_given_group("runs")
     
-    print "Created classifier."
-    c = Classifier()
-    print "Adding stopwords."
-    if DEBUG:
-        train_dir = 'simple/train'
-    else:
-        train_dir = '20news/train'
-        stopwords = generate_word_set_from_file('stopwords.txt')
-        c.add_stopwords(stopwords)
-    print "Training classifier."
-    c.train_all_from_directory(train_dir)
-    print "Initializing log space."
-    c.initialize_log_space()
-    print "Testing."
-    
+    #~ print "Created classifier."
+    #~ c = Classifier()
+    #~ print "Adding stopwords."
+    #~ if DEBUG:
+        #~ train_dir = 'simple/train'
+    #~ else:
+        #~ train_dir = '20news/train'
+        #~ stopwords = generate_word_set_from_file('stopwords.txt')
+        #~ c.add_stopwords(stopwords)
+    #~ print "Training classifier."
+    #~ c.train_all_from_directory(train_dir)
+    #~ print "Initializing log space."
+    #~ c.initialize_log_space()
+    #~ print "Testing."
+    #~ 
     #~ run_classifier_test('Baseline', c.classify_baseline)
-    
-    run_classifier_test('Bernouli Log Space', c.classify_bernoulli_log_space)
-    #run_classifier_test('Bernouli Probability', c.classify_bernoulli)
+    #~ 
+    #~ run_classifier_test('Bernouli Log Space', c.classify_bernoulli_log_space)
+    #~ #run_classifier_test('Bernouli Probability', c.classify_bernoulli)
     #~ run_classifier_test('Bernouli Log Space Smoothed', c.classify_bernoulli_log_space_smoothed)
-    
+    #~ 
     #~ run_classifier_test('Multinomial Log Space', c.classify_multinomial_log_space)
-    #run_classifier_test('Multinomial Probability', c.classify_multinomial)
+    #~ #run_classifier_test('Multinomial Probability', c.classify_multinomial)
     #~ run_classifier_test('Multinomial Log Space Smoothed', c.classify_multinomial_log_space_smoothed)
     
