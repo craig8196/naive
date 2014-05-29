@@ -9,7 +9,7 @@ import os.path
 from vocab_trie import VocabTrie
 from vocab_trie import Container
 
-DEBUG = True
+DEBUG = False
 
 def generate_word_set_from_file(file_path):
     result = set()
@@ -61,6 +61,8 @@ class Classifier(object):
             print "Total doc counts:", self.cat_total_doc_counts
             print "Total word counts:", self.cat_total_word_counts
             print "The rest:", self.cat_word_count_doc_count
+        
+        self.sanity_check()
     
     def train(self, category, words):
         new_words = []
@@ -85,14 +87,34 @@ class Classifier(object):
             # increment total word count
             self.cat_total_word_counts[category] += 1
             if word not in word_dict:
-                word_dict[word] = [0, 0]
+                word_dict[word] = [1, 0]
+                self.cat_total_word_counts[category] += 1
             # increment individual word count
             word_dict[word][0] += 1
         word_set = set(words)
         # increment word count of documents that contain that word
         for word in word_set:
             word_dict[word][1] += 1
+    
+    # Acid check to make sure counts and totals are reasonable
+    def sanity_check(self):
+        total = 0
+        for c, value in self.cat_total_doc_counts.items():
+            total += value
+        if total != self.total_docs:
+            print "Document totals are incorrect."
         
+        for c, c_words in self.cat_word_count_doc_count.items():
+            total = 0
+            for word, counts in c_words.items():
+                total += counts[0]
+                if counts[1] > self.cat_total_doc_counts[c]:
+                    print "Document total off for", c
+                if counts[0] < counts[1]:
+                    print "Document count of", word, "is less than word count."
+            if total != self.cat_total_word_counts[c]:
+                print "Word totals off for", c
+    
     def initialize_log_space(self):
         # Calc. log(P(C)) used with both models
         self.log_p_c = {}
@@ -100,15 +122,12 @@ class Classifier(object):
             self.log_p_c[cat] = math.log(cat_count) - math.log(self.total_docs)
         # Calc. log(P(F_i|C)) and log(1-P(F_i|C)), used with Multivariate Bernoulli where F is a feature (word type)
         self.log_f_given_c = {}
-        self.log_notf_given_c = {}
         # Calc. log(P(W_i|C)), used with Multinomial Model where W is a word token
         self.log_w_given_c = {}
         for cat, words in self.cat_word_count_doc_count.items():
             self.log_f_given_c[cat] = {}
-            self.log_notf_given_c[cat] = {}
             self.log_w_given_c[cat] = {}
             log_words = self.log_f_given_c[cat]
-            log_not_words = self.log_notf_given_c[cat]
             log_w_given_c = self.log_w_given_c[cat]
             doc_total = self.cat_total_doc_counts[cat]
             word_total = self.cat_total_word_counts[cat]
@@ -123,7 +142,6 @@ class Classifier(object):
                         count = 1
                         total += 1
                     log_words[word] = math.log(count) - math.log(total)
-                    log_not_words[word] = math.log(total - count) - math.log(total)
                 except Exception as e:
                     print e
                     print counts[1], doc_total
@@ -132,68 +150,114 @@ class Classifier(object):
             print "P(F|C)", self.log_f_given_c
             print "P(W|C)", self.log_w_given_c
     
-    def classify_multivariate_bernoulli(self, words):
+    def classify_by_argmax(self, words, calc_function):
+        # remove stopwords
+        temp = []
+        for w in words:
+            if w not in self.stopwords:
+                temp.append(w)
+        words = temp
+        
         classification = ''
         largest = -sys.float_info.max
+        if DEBUG:
+            print "Words:", words
         for c in self.cat_total_doc_counts:
-            calc = self.calc_multivariate_bernoulli(c, words)
+            calc = calc_function(c, words)
+            if DEBUG:
+                print "Calc:", calc, "Class:", c
             if calc > largest:
                 largest = calc
                 classification = c
         return classification
     
-    def calc_multivariate_bernoulli(self, c, words):
-        result = self.log_p_c[c]
+    def classify_baseline(self, words):
+        return self.classify_by_argmax(words, self.calc_baseline)
+    def calc_baseline(self, c, words):
+        result = 0
+        word_counts = self.cat_word_count_doc_count[c]
+        for w in words:
+            if w in word_counts:
+                result += word_counts[w][0]
+            else:
+                result += 1
+        return result
+    
+    # Uses log space
+    def classify_bernoulli_log_space(self, words):
+        return self.classify_by_argmax(words, self.calc_bernoulli_log_space)
+    def calc_bernoulli_log_space(self, c, words):
+        result = math.log(self.cat_total_doc_counts[c]) - math.log(self.total_docs)
         word_set = set(words)
-        log_f_given_c = self.log_f_given_c[c]
-        log_notf_given_c = self.log_notf_given_c[c]
-        for w, num in word_set.items():
-            if w in self.log_f_given_c:
-                result += num
-        return result
-    
-    def classify_multinomial(self, words):
-        classification = ''
-        largest = -sys.float_info.max
-        for c in self.cat_total_doc_counts:
-            calc = self.calc_multinomial(c, words)
-            #~ print calc
-            if calc > largest:
-                #~ print largest, classification
-                largest = calc
-                classification = c
-        return classification
-    
-    def calc_multinomial(self, c, words):
-        result = self.log_p_c[c]
-        for w in words:
-            if w in self.log_w_given_c:
-                result += self.log_w_given_c[w]
-        return result
-    
-    def classify_multinomial2(self, words):
-        print "Classifying:", words
-        classification = ''
-        largest = -sys.float_info.max
-        for c in self.cat_total_doc_counts:
-            calc = self.calc_multinomial2(c, words)
-            print "Calc:", calc
-            print "Class:", c
-            if calc > largest:
-                largest = calc
-                classification = c
-        return classification
-    
-    def calc_multinomial2(self, c, words):
-        result = self.cat_total_doc_counts[c]
-        my_words = self.cat_word_count_doc_count[c]
+        doc_counts = self.cat_word_count_doc_count[c]
         count = 0
-        for w in words:
-            if w in my_words:
-                result *= my_words[w][0]
+        for w in word_set:
+            if w in doc_counts:
                 count += 1
-        print count, result
-        result = result/((self.cat_total_word_counts[c]**count)*self.total_docs)
+                result += math.log(doc_counts[w][1])
+        result -= math.log(self.cat_total_doc_counts[c])*count
+        return result
+    
+    # Uses +1 trick
+    def classify_bernoulli_log_space_smoothed(self, words):
+        return self.classify_by_argmax(words, self.calc_bernoulli_log_space_smoothed)
+    def calc_bernoulli_log_space_smoothed(self, c, words):
+        result = math.log(self.cat_total_doc_counts[c]) - math.log(self.total_docs)
+        word_set = set(words)
+        doc_counts = self.cat_word_count_doc_count[c]
+        count = 0
+        for w in word_set:
+            if w in doc_counts:
+                result += math.log(doc_counts[w][1]+1)
+            else:
+                count += 1
+        result -= math.log(self.cat_total_doc_counts[c]+count+len(self.cat_word_count_doc_count[c]))*len(word_set)
+        return result
+    
+    # Returns probabilities, mostly for testing
+    def classify_bernoulli(self, words):
+        return self.classify_by_argmax(words, self.calc_bernoulli)
+    def calc_bernoulli(self, c, words):
+        result = self.cat_total_doc_counts[c]/self.total_docs
+        word_set = set(words)
+        doc_counts = self.cat_word_count_doc_count[c]
+        for w in word_set:
+            if w in doc_counts:
+                result *= doc_counts[w][1]/self.cat_total_doc_counts[c]
+        return result
+    
+    # Uses log space
+    def classify_multinomial_log_space(self, words):
+        return self.classify_by_argmax(words, self.calc_multinomial_log_space)
+    def calc_multinomial_log_space(self, c, words):
+        result = self.log_p_c[c]
+        log_w_given_c = self.log_w_given_c[c]
+        for w in words:
+            if w in log_w_given_c:
+                result += log_w_given_c[w]
+        return result
+    
+    # Uses + 1 trick
+    def classify_multinomial_log_space_smoothed(self, words):
+        return self.classify_by_argmax(words, self.calc_multinomial_log_space_smoothed)
+    def calc_multinomial_log_space_smoothed(self, c, words):
+        result = math.log(self.cat_total_doc_counts[c]) - math.log(self.total_docs)
+        word_counts = self.cat_word_count_doc_count[c]
+        for w in words:
+            if w in word_counts:
+                result += math.log(word_counts[w][0]+1)
+        result += math.log(self.cat_total_word_counts[c] + len(words))*len(words)
+        return result
+    
+    # Returns probabilities, mostly for testing
+    def classify_multinomial(self, words):
+        return self.classify_by_argmax(words, self.calc_multinomial)
+    def calc_multinomial(self, c, words):
+        result = self.cat_total_doc_counts[c]/self.total_docs
+        word_counts = self.cat_word_count_doc_count[c]
+        for w in words:
+            if w in word_counts:
+                result *= word_counts[w][0]/self.cat_total_word_counts[c]
         return result
 
 class ModelTrainer(object):
@@ -330,6 +394,35 @@ class ModelTester(object):
         else:
             return 0, max_group
 
+# Takes a name and a function that can be used to classify a word list
+def run_classifier_test(name, classifier_function):
+    if DEBUG:
+        test_dir = 'simple/test'
+    else:
+        test_dir = '20news/test'
+    
+    confusion_matrix = {}
+    wins = 0
+    losses = 0
+    base_dir = test_dir
+    dirs = os.listdir(base_dir)
+    print name
+    for d in dirs:
+        files = os.listdir(base_dir + '/' + d)
+        for f in files:
+            with open(base_dir + '/' + d + '/' + f, 'r') as f2:
+                cat = classifier_function(generate_word_list_from_text(f2.read()))
+                if cat == d:
+                    wins += 1
+                else:
+                    losses += 1
+                if (d, cat) not in confusion_matrix:
+                    confusion_matrix[(d, cat)] = 0
+                confusion_matrix[(d, cat)] += 1
+    print wins, losses, wins + losses
+    if DEBUG:
+        print confusion_matrix
+
 if __name__ == "__main__":
     trainer = ModelTrainer("20news/train")
 
@@ -349,31 +442,28 @@ if __name__ == "__main__":
     f.write(tester.filestr)
     # print trainer.group_map["rec.sport.baseball"].get_probability_type_given_group("runs")
     
+    #~ print "Created classifier."
+    #~ c = Classifier()
+    #~ print "Adding stopwords."
+    #~ if DEBUG:
+        #~ train_dir = 'simple/train'
+    #~ else:
+        #~ train_dir = '20news/train'
+        #~ stopwords = generate_word_set_from_file('stoplist.txt')
+        #~ c.add_stopwords(stopwords)
+    #~ print "Training classifier."
+    #~ c.train_all_from_directory(train_dir)
+    #~ print "Initializing log space."
+    #~ c.initialize_log_space()
+    #~ print "Testing."
+    #~ 
+    #~ run_classifier_test('Baseline', c.classify_baseline)
+    #~ 
+    #~ run_classifier_test('Bernouli Log Space', c.classify_bernoulli_log_space)
+    #~ #run_classifier_test('Bernouli Probability', c.classify_bernoulli)
+    #~ run_classifier_test('Bernouli Log Space Smoothed', c.classify_bernoulli_log_space_smoothed)
+    #~ 
+    #~ run_classifier_test('Multinomial Log Space', c.classify_multinomial_log_space)
+    #~ #run_classifier_test('Multinomial Probability', c.classify_multinomial)
+    #~ run_classifier_test('Multinomial Log Space Smoothed', c.classify_multinomial_log_space_smoothed)
     
-    # print "Created classifier."
-    # c = Classifier()
-    # print "Adding stopwords."
-    #~ stopwords = generate_word_set_from_file('stopwords.txt')
-    #~ c.add_stopwords(stopwords)
-    # print "Training classifier."
-    # c.train_all_from_directory('simple/train')
-    # print "Initializing log space."
-    # c.initialize_log_space()
-    # print "Testing."
-    
-    # wins = 0
-    # losses = 0
-    # base_dir = 'simple/test'
-    # dirs = os.listdir(base_dir)
-    # print dirs
-    # for d in dirs:
-    #     files = os.listdir(base_dir + '/' + d)
-    #     for f in files:
-    #         #~ f = files[i]
-    #         with open(base_dir + '/' + d + '/' + f, 'r') as f2:
-    #             cat = c.classify_multinomial(generate_word_list_from_text(f2.read()))
-    #             if cat == d:
-    #                 wins += 1
-    #             else:
-    #                 losses += 1
-    # print wins, losses
